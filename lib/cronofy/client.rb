@@ -10,6 +10,7 @@ module Cronofy
       read_events
       create_event
       delete_event
+      available_periods
     }.freeze
 
     # Public: Initialize a new Cronofy::Client.
@@ -1452,6 +1453,33 @@ module Cronofy
       nil
     end
 
+    ###### Available periods
+
+    def available_periods(options={})
+      params = READ_EVENTS_DEFAULT_PARAMS.merge(options)
+
+      READ_EVENTS_DEFAULT_PARAMS.select { |tp| params.key?(tp) }.each do |tp|
+        params[tp] = to_iso8601(params[tp])
+      end
+
+      url = api_url + "/v1/available_periods"
+      PagedResultIterator.new(PagedEventsResult, :available_periods, access_token!, url, params)
+    end
+
+    def upsert_availability_period(body)
+      response = wrapped_request { post("/v1/available_periods", body) }
+      nil
+    end
+
+    # Public: Alias for #upsert_available_period
+    alias_method :create_or_update_availability_period, :upsert_availability_period
+
+    def delete_availability_period(availability_period_id)
+      wrapped_request { delete("/v1/available_periods/#{availability_period_id}") }
+      nil
+    end
+
+
     # Public: Creates a scheduling conversation
     #
     # pre release end-point documentation to follow
@@ -1646,6 +1674,12 @@ module Cronofy
       from
       to
       last_modified
+    }.freeze
+
+    READ_AVAILABILITY_PERIOD_DEFAULT_PARAMS = { tzid: "Etc/UTC" }.freeze
+    READ_AVAILABILITY_PERIOD_TIME_PARAMS = %i{
+      from
+      to
     }.freeze
 
     def access_token!
