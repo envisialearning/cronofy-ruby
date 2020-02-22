@@ -1475,7 +1475,7 @@ module Cronofy
     alias_method :create_or_update_availability_period, :upsert_availability_period
 
     def delete_availability_period(availability_period_id)
-      wrapped_request { delete("/v1/available_periods/#{availability_period_id}") }
+      delete("/v1/available_periods", {available_period_id: availability_period_id})
       nil
     end
 
